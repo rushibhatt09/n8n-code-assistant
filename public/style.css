@@ -1,0 +1,155 @@
+:root {
+  --bg: #0f1115;
+  --panel: #161a21;
+  --panel-2: #1d222b;
+  --border: #2a303c;
+  --text: #e7e9ee;
+  --muted: #9aa3b2;
+  --accent: #ff6d5a;
+  --accent-2: #6d8dff;
+  --code-bg: #0b0d11;
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+}
+
+* { box-sizing: border-box; }
+
+body {
+  margin: 0;
+  background: var(--bg);
+  color: var(--text);
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+}
+
+.topbar {
+  padding: 20px 28px;
+  border-bottom: 1px solid var(--border);
+  background: linear-gradient(135deg, #171a21, #12141a);
+}
+
+.brand { display: flex; align-items: center; gap: 14px; }
+.logo { font-size: 32px; }
+.brand h1 { margin: 0; font-size: 20px; }
+.brand p { margin: 2px 0 0; color: var(--muted); font-size: 13px; }
+
+.layout {
+  flex: 1;
+  display: grid;
+  grid-template-columns: 220px 1fr;
+  gap: 24px;
+  padding: 24px 28px;
+  max-width: 1100px;
+  margin: 0 auto;
+  width: 100%;
+}
+
+.sidebar h2 { font-size: 13px; text-transform: uppercase; letter-spacing: 0.05em; color: var(--muted); margin: 4px 0 10px; }
+.category-list { list-style: none; margin: 0; padding: 0; display: flex; flex-direction: column; gap: 4px; }
+
+.cat-btn {
+  width: 100%;
+  text-align: left;
+  background: transparent;
+  border: none;
+  color: var(--text);
+  padding: 8px 10px;
+  border-radius: 8px;
+  cursor: pointer;
+  font-size: 14px;
+}
+.cat-btn:hover { background: var(--panel-2); }
+.cat-btn.active { background: var(--accent); color: #1a0f0c; font-weight: 600; }
+
+.api-status {
+  margin-top: 24px;
+  font-size: 12px;
+  color: var(--muted);
+  padding: 10px;
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  background: var(--panel);
+}
+
+.ask-box, .search-box {
+  background: var(--panel);
+  border: 1px solid var(--border);
+  border-radius: 14px;
+  padding: 18px 20px;
+  margin-bottom: 18px;
+}
+.ask-box h2 { margin: 0 0 4px; font-size: 16px; }
+.ask-box .hint { color: var(--muted); font-size: 13px; margin: 0 0 12px; }
+
+.ask-row { display: flex; gap: 8px; }
+#ask-input, #search-input {
+  flex: 1;
+  background: var(--panel-2);
+  border: 1px solid var(--border);
+  color: var(--text);
+  padding: 12px 14px;
+  border-radius: 10px;
+  font-size: 14px;
+}
+#search-input { width: 100%; }
+#ask-btn {
+  background: var(--accent);
+  border: none;
+  color: #1a0f0c;
+  font-weight: 700;
+  padding: 0 20px;
+  border-radius: 10px;
+  cursor: pointer;
+}
+#ask-btn:disabled { opacity: 0.6; cursor: default; }
+
+.ask-result { margin-top: 16px; padding: 14px; background: var(--panel-2); border-radius: 10px; border: 1px solid var(--border); }
+.ask-result.hidden, .article-view.hidden { display: none; }
+.ask-result .sources { margin-top: 10px; font-size: 12px; color: var(--muted); }
+.ask-result .sources a { color: var(--accent-2); text-decoration: none; margin-right: 8px; }
+.ask-result .error { color: #ff8a80; }
+
+.results { display: grid; gap: 10px; }
+.result-card {
+  background: var(--panel);
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  padding: 14px 16px;
+  cursor: pointer;
+}
+.result-card:hover { border-color: var(--accent-2); }
+.result-card h3 { margin: 0 0 4px; font-size: 15px; }
+.result-card .badge {
+  display: inline-block;
+  font-size: 11px;
+  color: var(--accent-2);
+  background: rgba(109,141,255,0.12);
+  padding: 2px 8px;
+  border-radius: 999px;
+  margin-bottom: 6px;
+}
+.result-card p { margin: 0; color: var(--muted); font-size: 13px; }
+
+.article-view { background: var(--panel); border: 1px solid var(--border); border-radius: 14px; padding: 20px; }
+.back-btn { background: none; border: none; color: var(--accent-2); cursor: pointer; margin-bottom: 12px; font-size: 13px; }
+
+#article-content h1, #article-content h2, #article-content h3 { margin-top: 1.2em; }
+#article-content pre {
+  background: var(--code-bg);
+  border: 1px solid var(--border);
+  padding: 12px 14px;
+  border-radius: 10px;
+  overflow-x: auto;
+}
+#article-content code { font-family: "SF Mono", Consolas, Menlo, monospace; font-size: 13px; }
+#article-content p code, #article-content li code {
+  background: var(--code-bg);
+  padding: 2px 6px;
+  border-radius: 4px;
+}
+
+.footer { text-align: center; color: var(--muted); font-size: 12px; padding: 16px; border-top: 1px solid var(--border); }
+
+@media (max-width: 720px) {
+  .layout { grid-template-columns: 1fr; }
+}

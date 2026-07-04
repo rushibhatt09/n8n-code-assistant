@@ -1,0 +1,61 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>n8n Code Assistant</title>
+<link rel="stylesheet" href="style.css" />
+</head>
+<body>
+  <header class="topbar">
+    <div class="brand">
+      <span class="logo">🧩</span>
+      <div>
+        <h1>n8n Code Assistant</h1>
+        <p>Search n8n node setups, API integrations &amp; AI/LLM workflows — or just ask in plain English.</p>
+      </div>
+    </div>
+  </header>
+
+  <main class="layout">
+    <aside class="sidebar">
+      <h2>Categories</h2>
+      <ul id="category-list" class="category-list">
+        <li data-category="">
+          <button class="cat-btn active" data-category="">All</button>
+        </li>
+      </ul>
+      <div class="api-status" id="api-status"></div>
+    </aside>
+
+    <section class="content">
+      <div class="ask-box">
+        <h2>Ask AI a question</h2>
+        <p class="hint">e.g. "How do I send a Slack message when a Google Form is submitted?" or "How do I connect an AI Agent to a custom API?"</p>
+        <div class="ask-row">
+          <input id="ask-input" type="text" placeholder="Type your question in plain English..." />
+          <button id="ask-btn">Ask</button>
+        </div>
+        <div id="ask-result" class="ask-result hidden"></div>
+      </div>
+
+      <div class="search-box">
+        <input id="search-input" type="text" placeholder="Or browse/search the knowledge base (e.g. 'webhook', 'Slack', 'RAG', 'error handling')..." />
+      </div>
+
+      <div id="results" class="results"></div>
+
+      <div id="article-view" class="article-view hidden">
+        <button id="back-btn" class="back-btn">&larr; Back to results</button>
+        <div id="article-content"></div>
+      </div>
+    </section>
+  </main>
+
+  <footer class="footer">
+    <p>Runs 100% on your machine. Your questions go only to the AI provider you configured (if any) — nothing is tracked or stored elsewhere.</p>
+  </footer>
+
+  <script src="app.js"></script>
+</body>
+</html>

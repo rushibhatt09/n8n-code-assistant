@@ -1,0 +1,33 @@
+---
+title: Prompt Engineering Basics for n8n
+category: ai-llm
+tags: [prompt-engineering, system-message, best-practices]
+summary: Plain-English tips for writing system prompts and messages that get reliable results from n8n's AI nodes.
+---
+
+The **System Message** field (found in AI Agent, Basic LLM Chain, and Chat Model options) sets the AI's role, tone, and rules before it sees any user input. Getting this right is the single biggest lever for reliable AI behavior in your workflows — better than switching models or tweaking temperature.
+
+## Setup steps
+
+1. Open the **Options** section of your AI Agent or Basic LLM Chain node and find **System Message**.
+2. State the role clearly: "You are a [role] that does [task] for [audience]."
+3. List concrete rules or constraints as short bullet-style sentences (tone, length limits, what NOT to do).
+4. If the output feeds into another system, specify the exact format expected (or better, use a **Structured Output Parser** — see that topic).
+5. Give 1–2 examples of good input/output pairs if the task is nuanced (this is called "few-shot" prompting).
+6. Keep the user-facing **Prompt** field focused only on the actual request/data — put stable instructions in the System Message, not repeated in every prompt.
+7. Test with edge cases (empty input, rude input, off-topic questions) and adjust the system message to handle them.
+
+```
+You are a customer support assistant for Dermatouch, a skincare brand.
+
+Rules:
+- Only answer questions about orders, shipping, and product ingredients.
+- If asked about anything else, politely say you can only help with those topics.
+- Keep replies under 4 sentences.
+- Never invent an order status — always use the order lookup tool.
+- If you are not confident in an answer, say "Let me check with the team" instead of guessing.
+```
+
+## Common mistake
+
+Writing a system message that's too long or crams in unrelated instructions — models tend to follow the first and last few rules best and can "forget" rules buried in the middle of a huge block of text. Keep system messages focused, use short bullet points, and put your most important rule first and your most important formatting instruction last.
