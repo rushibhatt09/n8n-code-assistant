@@ -8,6 +8,21 @@ Two ways to get help:
 
 Everything runs locally on your own computer. Nothing is uploaded anywhere except your own question text, and only if you've added an AI API key (see below).
 
+> **Important:** this is a small local web app, not a plain webpage. Double-clicking `public/index.html` (or viewing files on GitHub) will **not** work — the page needs its Node server running to answer search/AI requests. Always start it the way described below.
+
+---
+
+## Fastest way to start it (Windows)
+
+Double-click **`start.bat`** in this folder. It will:
+1. Install everything it needs the first time (may take a minute).
+2. Create your `.env` file automatically if you don't have one yet.
+3. Start the server and open the site in your browser.
+
+To stop it later, just close the black window it opens.
+
+If you're not on Windows, or want more control, follow the manual steps below.
+
 ---
 
 ## 1. Requirements
