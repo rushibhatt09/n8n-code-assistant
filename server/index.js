@@ -12,7 +12,13 @@ const PORT = process.env.PORT || 4477;
 
 app.use(cors());
 app.use(express.json());
-app.use(express.static(path.join(__dirname, '..', 'public')));
+app.use(
+  express.static(path.join(__dirname, '..', 'public'), {
+    etag: false,
+    lastModified: false,
+    setHeaders: (res) => res.setHeader('Cache-Control', 'no-store'),
+  })
+);
 
 let articles = loadArticles();
 let fuse = buildIndex(articles);
