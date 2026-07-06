@@ -52,6 +52,71 @@ const items = $input.first().json.products;
 return items.map(product => ({ json: product }));
 ```
 
+## Ready-to-paste example
+
+This complete workflow uses a Code node to reshape incoming JSON (combining name fields, lowercasing email) — import it, run it, and edit the sample data in the Set node to try your own fields.
+
+```json
+{
+  "name": "Transform JSON in Code Node",
+  "nodes": [
+    {
+      "parameters": {},
+      "id": "8a2c073b-8888-4a2b-8c3d-000000000001",
+      "name": "When clicking 'Execute workflow'",
+      "type": "n8n-nodes-base.manualTrigger",
+      "typeVersion": 1,
+      "position": [240, 300]
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            { "id": "a1", "name": "first_name", "value": "<PLACEHOLDER_FIRST_NAME>", "type": "string" },
+            { "id": "a2", "name": "last_name", "value": "<PLACEHOLDER_LAST_NAME>", "type": "string" },
+            { "id": "a3", "name": "email", "value": "<PLACEHOLDER_EMAIL@EXAMPLE.COM>", "type": "string" }
+          ]
+        },
+        "options": {}
+      },
+      "id": "8a2c073b-8888-4a2b-8c3d-000000000002",
+      "name": "Set Sample Data",
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [460, 300]
+    },
+    {
+      "parameters": {
+        "jsCode": "const items = $input.all();\n\nconst result = items.map(item => {\n  return {\n    json: {\n      name: item.json.first_name + ' ' + item.json.last_name,\n      email: item.json.email.toLowerCase(),\n    }\n  };\n});\n\nreturn result;"
+      },
+      "id": "8a2c073b-8888-4a2b-8c3d-000000000003",
+      "name": "Code",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [680, 300]
+    }
+  ],
+  "connections": {
+    "When clicking 'Execute workflow'": {
+      "main": [
+        [
+          { "node": "Set Sample Data", "type": "main", "index": 0 }
+        ]
+      ]
+    },
+    "Set Sample Data": {
+      "main": [
+        [
+          { "node": "Code", "type": "main", "index": 0 }
+        ]
+      ]
+    }
+  },
+  "pinData": {},
+  "settings": { "executionOrder": "v1" }
+}
+```
+
 ## Common mistake
 
 Returning plain objects instead of wrapping them in `{ json: ... }`. Writing `return items;` where `items` is just `[{name: "a"}, {name: "b"}]` will cause an error or unexpected behavior — n8n expects `[{ json: { name: "a" } }, { json: { name: "b" } }]`. Always wrap each item's data inside a `json` key.

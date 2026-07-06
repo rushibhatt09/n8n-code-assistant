@@ -38,6 +38,91 @@ const resetSeconds = Number($json.headers['x-ratelimit-reset']);
 return [{ json: { remaining, waitSeconds: remaining === 0 ? resetSeconds : 0 } }];
 ```
 
+## Ready-to-paste example
+
+This complete workflow processes items one at a time using Loop Over Items, calls an API, and waits 1 second between each call to avoid hitting a rate limit — import it and change the URL.
+
+```json
+{
+  "name": "Rate-Limited API Loop",
+  "nodes": [
+    {
+      "parameters": {},
+      "id": "6e4a291f-6666-4a2b-8c3d-000000000001",
+      "name": "When clicking 'Execute workflow'",
+      "type": "n8n-nodes-base.manualTrigger",
+      "typeVersion": 1,
+      "position": [240, 300]
+    },
+    {
+      "parameters": {
+        "batchSize": 1,
+        "options": {}
+      },
+      "id": "6e4a291f-6666-4a2b-8c3d-000000000002",
+      "name": "Loop Over Items",
+      "type": "n8n-nodes-base.splitInBatches",
+      "typeVersion": 3,
+      "position": [460, 300]
+    },
+    {
+      "parameters": {
+        "url": "=<API_ENDPOINT_URL>/{{ $json.id }}",
+        "options": {}
+      },
+      "id": "6e4a291f-6666-4a2b-8c3d-000000000003",
+      "name": "HTTP Request",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [680, 220]
+    },
+    {
+      "parameters": {
+        "amount": 1
+      },
+      "id": "6e4a291f-6666-4a2b-8c3d-000000000004",
+      "name": "Wait",
+      "type": "n8n-nodes-base.wait",
+      "typeVersion": 1.1,
+      "position": [900, 220]
+    }
+  ],
+  "connections": {
+    "When clicking 'Execute workflow'": {
+      "main": [
+        [
+          { "node": "Loop Over Items", "type": "main", "index": 0 }
+        ]
+      ]
+    },
+    "Loop Over Items": {
+      "main": [
+        [],
+        [
+          { "node": "HTTP Request", "type": "main", "index": 0 }
+        ]
+      ]
+    },
+    "HTTP Request": {
+      "main": [
+        [
+          { "node": "Wait", "type": "main", "index": 0 }
+        ]
+      ]
+    },
+    "Wait": {
+      "main": [
+        [
+          { "node": "Loop Over Items", "type": "main", "index": 0 }
+        ]
+      ]
+    }
+  },
+  "pinData": {},
+  "settings": { "executionOrder": "v1" }
+}
+```
+
 ## Common mistake
 
 Processing all items at once with no batching or delay, assuming n8n's speed is fine because "it's just an API call." n8n can fire requests very quickly in a loop, and without batching (Loop Over Items) plus a Wait node, you can burn through an API's rate limit in seconds and get your account throttled or banned.

@@ -33,4 +33,87 @@ The Wait node pauses your workflow before continuing to the next step. Use it to
 }
 ```
 
+## Ready-to-paste example
+
+Pasting this creates a Manual Trigger that calls an API, then pauses for 2 seconds (to respect a rate limit) before a second API call.
+
+```json
+{
+  "name": "Wait Between API Calls Example",
+  "nodes": [
+    {
+      "parameters": {},
+      "id": "f2a3b4c5-0001-4f22-8a22-000000000001",
+      "name": "When clicking 'Execute workflow'",
+      "type": "n8n-nodes-base.manualTrigger",
+      "typeVersion": 1,
+      "position": [460, 300]
+    },
+    {
+      "parameters": {
+        "method": "GET",
+        "url": "<YOUR_API_URL>/status",
+        "options": {}
+      },
+      "id": "f2a3b4c5-0002-4f22-8a22-000000000002",
+      "name": "First API Call",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [680, 300]
+    },
+    {
+      "parameters": {
+        "resume": "timeInterval",
+        "amount": 2,
+        "unit": "seconds"
+      },
+      "id": "f2a3b4c5-0003-4f22-8a22-000000000003",
+      "name": "Wait",
+      "type": "n8n-nodes-base.wait",
+      "typeVersion": 1.1,
+      "position": [900, 300]
+    },
+    {
+      "parameters": {
+        "method": "GET",
+        "url": "<YOUR_API_URL>/status",
+        "options": {}
+      },
+      "id": "f2a3b4c5-0004-4f22-8a22-000000000004",
+      "name": "Second API Call",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [1120, 300]
+    }
+  ],
+  "connections": {
+    "When clicking 'Execute workflow'": {
+      "main": [
+        [
+          { "node": "First API Call", "type": "main", "index": 0 }
+        ]
+      ]
+    },
+    "First API Call": {
+      "main": [
+        [
+          { "node": "Wait", "type": "main", "index": 0 }
+        ]
+      ]
+    },
+    "Wait": {
+      "main": [
+        [
+          { "node": "Second API Call", "type": "main", "index": 0 }
+        ]
+      ]
+    }
+  },
+  "pinData": {},
+  "settings": {
+    "executionOrder": "v1"
+  }
+}
+```
+
 Common mistake: adding a Wait node inside a loop to slow down API calls, but setting the amount too low (or forgetting it entirely) and still hitting the API's rate limit — resulting in failed requests further down the workflow. Check the target API's documented rate limit and set the Wait duration with some safety margin, not the bare minimum.

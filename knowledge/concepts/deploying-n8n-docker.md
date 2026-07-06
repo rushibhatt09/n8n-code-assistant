@@ -63,6 +63,57 @@ POSTGRES_PASSWORD=change_this_password
 N8N_ENCRYPTION_KEY=a-long-random-string-keep-this-safe
 ```
 
+## Ready-to-paste example
+
+This is a complete, ready-to-run `docker-compose.yml` you can drop into an empty folder and start immediately after filling in the placeholders.
+
+```yaml
+version: "3.8"
+
+services:
+  postgres:
+    image: postgres:16
+    restart: always
+    environment:
+      POSTGRES_USER: n8n
+      POSTGRES_PASSWORD: <YOUR_POSTGRES_PASSWORD>
+      POSTGRES_DB: n8n
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+
+  n8n:
+    image: docker.n8n.io/n8nio/n8n
+    restart: always
+    ports:
+      - "5678:5678"
+    environment:
+      DB_TYPE: postgresdb
+      DB_POSTGRESDB_HOST: postgres
+      DB_POSTGRESDB_DATABASE: n8n
+      DB_POSTGRESDB_USER: n8n
+      DB_POSTGRESDB_PASSWORD: <YOUR_POSTGRES_PASSWORD>
+      N8N_ENCRYPTION_KEY: <YOUR_ENCRYPTION_KEY>
+      WEBHOOK_URL: https://<YOUR_DOMAIN>/
+      GENERIC_TIMEZONE: <YOUR_TIMEZONE>
+    volumes:
+      - n8n_data:/home/node/.n8n
+    depends_on:
+      - postgres
+
+volumes:
+  postgres_data:
+  n8n_data:
+```
+
+Save that as `docker-compose.yml`, then run these commands in the same folder to start it:
+
+```
+docker compose up -d
+docker compose logs -f n8n
+```
+
+Visit `http://localhost:5678` (or your server's IP) to complete first-time setup.
+
 ## Common mistake
 
 Not backing up (or losing) the `N8N_ENCRYPTION_KEY`. This key is what n8n uses to encrypt all saved credentials. If you lose it or change it without migrating properly, every saved credential becomes unreadable and you'll need to re-enter all of them. Always store this key safely and keep it identical across restarts and upgrades.

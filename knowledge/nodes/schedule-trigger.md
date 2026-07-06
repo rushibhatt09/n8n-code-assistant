@@ -30,4 +30,61 @@ The Schedule Trigger node starts your workflow on a timer — every hour, every 
 }
 ```
 
+## Ready-to-paste example
+
+Pasting this creates a workflow that runs automatically at 9:00 AM every weekday and posts a "daily report" message via HTTP Request — remember to flip the Active toggle after pasting.
+
+```json
+{
+  "name": "Weekday 9AM Report Example",
+  "nodes": [
+    {
+      "parameters": {
+        "rule": {
+          "interval": [
+            {
+              "field": "cronExpression",
+              "expression": "0 9 * * 1-5"
+            }
+          ]
+        }
+      },
+      "id": "b2c3d4e5-0001-4b88-8c88-000000000001",
+      "name": "Schedule Trigger",
+      "type": "n8n-nodes-base.scheduleTrigger",
+      "typeVersion": 1.2,
+      "position": [460, 300]
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "<YOUR_API_URL>",
+        "sendBody": true,
+        "contentType": "json",
+        "jsonBody": "={{ { \"text\": \"Daily report generated at \" + $now.toISO() } }}",
+        "options": {}
+      },
+      "id": "b2c3d4e5-0002-4b88-8c88-000000000002",
+      "name": "Send Daily Report",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [680, 300]
+    }
+  ],
+  "connections": {
+    "Schedule Trigger": {
+      "main": [
+        [
+          { "node": "Send Daily Report", "type": "main", "index": 0 }
+        ]
+      ]
+    }
+  },
+  "pinData": {},
+  "settings": {
+    "executionOrder": "v1"
+  }
+}
+```
+
 Common mistake: building and testing the workflow, then forgetting to flip the **Active** toggle on. A Schedule Trigger does nothing on its own timeline unless the workflow is activated — testing it manually with "Execute workflow" only runs it once immediately and proves the logic works, it doesn't set up the recurring schedule.

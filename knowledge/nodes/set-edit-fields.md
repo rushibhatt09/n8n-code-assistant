@@ -39,4 +39,91 @@ The Set node (labeled "Edit Fields" in the node picker) lets you create new fiel
 }
 ```
 
+## Ready-to-paste example
+
+Pasting this creates a Manual Trigger with sample name/spend data feeding a Set node that builds a `fullName` field and an `isVip` flag while keeping the original fields.
+
+```json
+{
+  "name": "Set Edit Fields Example",
+  "nodes": [
+    {
+      "parameters": {},
+      "id": "c2d3e4f5-0001-4c99-8d99-000000000001",
+      "name": "When clicking 'Execute workflow'",
+      "type": "n8n-nodes-base.manualTrigger",
+      "typeVersion": 1,
+      "position": [460, 300]
+    },
+    {
+      "parameters": {
+        "mode": "manual",
+        "duplicateItem": false,
+        "assignments": {
+          "assignments": [
+            { "name": "firstName", "type": "string", "value": "Jane" },
+            { "name": "lastName", "type": "string", "value": "Doe" },
+            { "name": "totalSpend", "type": "number", "value": 1500 }
+          ]
+        },
+        "options": {}
+      },
+      "id": "c2d3e4f5-0002-4c99-8d99-000000000002",
+      "name": "Sample Customer",
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [680, 300]
+    },
+    {
+      "parameters": {
+        "mode": "manual",
+        "duplicateItem": false,
+        "assignments": {
+          "assignments": [
+            {
+              "name": "fullName",
+              "type": "string",
+              "value": "={{ $json.firstName }} {{ $json.lastName }}"
+            },
+            {
+              "name": "isVip",
+              "type": "boolean",
+              "value": "={{ $json.totalSpend > 1000 }}"
+            }
+          ]
+        },
+        "options": {
+          "includeOtherFields": true
+        }
+      },
+      "id": "c2d3e4f5-0003-4c99-8d99-000000000003",
+      "name": "Edit Fields",
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [900, 300]
+    }
+  ],
+  "connections": {
+    "When clicking 'Execute workflow'": {
+      "main": [
+        [
+          { "node": "Sample Customer", "type": "main", "index": 0 }
+        ]
+      ]
+    },
+    "Sample Customer": {
+      "main": [
+        [
+          { "node": "Edit Fields", "type": "main", "index": 0 }
+        ]
+      ]
+    }
+  },
+  "pinData": {},
+  "settings": {
+    "executionOrder": "v1"
+  }
+}
+```
+
 Common mistake: leaving **Include Other Fields** (or "Keep Only Set" in older versions) in its default state and then losing all the other data fields you needed later in the workflow. Always check this setting when the next node complains that a field "doesn't exist" — it was probably dropped here.

@@ -41,6 +41,69 @@ Use a **Loop Over Items (Split in Batches)** node combined with an **IF** node c
 return [{ json: { hasMore: $json.next_cursor !== null } }];
 ```
 
+## Ready-to-paste example
+
+This complete workflow fetches every page from an offset-paginated API using the HTTP Request node's built-in pagination — import it and change the URL and limit.
+
+```json
+{
+  "name": "Fetch All Pages (Offset Pagination)",
+  "nodes": [
+    {
+      "parameters": {},
+      "id": "5d5f3a0e-5555-4a2b-8c3d-000000000001",
+      "name": "When clicking 'Execute workflow'",
+      "type": "n8n-nodes-base.manualTrigger",
+      "typeVersion": 1,
+      "position": [240, 300]
+    },
+    {
+      "parameters": {
+        "url": "<API_LIST_ENDPOINT_URL>",
+        "sendQuery": true,
+        "queryParameters": {
+          "parameters": [
+            { "name": "limit", "value": "50" },
+            { "name": "offset", "value": "={{ $pageCount * 50 }}" }
+          ]
+        },
+        "options": {
+          "pagination": {
+            "pagination": {
+              "paginationMode": "updateAParameterInEachRequest",
+              "parameters": {
+                "parameters": [
+                  { "type": "qs", "name": "offset", "value": "={{ $pageCount * 50 }}" }
+                ]
+              },
+              "paginationCompleteWhen": "responseIsEmpty",
+              "limitPagesFetched": true,
+              "maxRequests": 20
+            }
+          }
+        }
+      },
+      "id": "5d5f3a0e-5555-4a2b-8c3d-000000000002",
+      "name": "HTTP Request",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [460, 300]
+    }
+  ],
+  "connections": {
+    "When clicking 'Execute workflow'": {
+      "main": [
+        [
+          { "node": "HTTP Request", "type": "main", "index": 0 }
+        ]
+      ]
+    }
+  },
+  "pinData": {},
+  "settings": { "executionOrder": "v1" }
+}
+```
+
 ## Common mistake
 
 Forgetting to set **Pagination Complete When**, which can cause n8n to keep requesting pages forever (or until it hits an error) because it never knows when to stop. Always define a clear stop condition, and add a page limit as a backup safety net.

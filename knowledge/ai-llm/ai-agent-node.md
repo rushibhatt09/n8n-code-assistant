@@ -31,6 +31,102 @@ The **AI Agent** node is n8n's "thinking" node. Instead of just sending one prom
 }
 ```
 
+## Ready-to-paste example
+
+This workflow starts from a chat window, sends the message to an AI Agent that has a short-term memory and one live tool (order status lookup), and replies in the same chat.
+
+```json
+{
+  "name": "Dermatouch Support Agent",
+  "nodes": [
+    {
+      "parameters": {},
+      "id": "a1b2c3d4-e5f6-4890-abcd-ef1234567890",
+      "name": "When chat message received",
+      "type": "@n8n/n8n-nodes-langchain.chatTrigger",
+      "typeVersion": 1.1,
+      "position": [220, 300]
+    },
+    {
+      "parameters": {
+        "promptType": "define",
+        "text": "={{ $json.chatInput }}",
+        "options": {
+          "systemMessage": "You are a support assistant for Dermatouch. Answer using the tools provided. If you don't know, say so."
+        }
+      },
+      "id": "b2c3d4e5-f6a7-4901-bcde-f12345678901",
+      "name": "AI Agent",
+      "type": "@n8n/n8n-nodes-langchain.agent",
+      "typeVersion": 1.7,
+      "position": [440, 300]
+    },
+    {
+      "parameters": {
+        "model": "gpt-4o-mini",
+        "options": {
+          "temperature": 0.3
+        }
+      },
+      "id": "c3d4e5f6-a7b8-4012-cdef-123456789012",
+      "name": "OpenAI Chat Model",
+      "type": "@n8n/n8n-nodes-langchain.lmChatOpenAi",
+      "typeVersion": 1.2,
+      "position": [340, 500],
+      "credentials": {
+        "openAiApi": {
+          "id": "1",
+          "name": "OpenAi account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "sessionIdType": "customKey",
+        "sessionKey": "={{ $json.sessionId }}",
+        "contextWindowLength": 10
+      },
+      "id": "d4e5f6a7-b8c9-4123-def0-234567890123",
+      "name": "Window Buffer Memory",
+      "type": "@n8n/n8n-nodes-langchain.memoryBufferWindow",
+      "typeVersion": 1.3,
+      "position": [500, 500]
+    },
+    {
+      "parameters": {
+        "name": "get_order_status",
+        "description": "Look up the current shipping status of a customer order. Input: the order ID as a string.",
+        "url": "https://api.dermatouch.com/orders/{{ $fromAI('orderId', 'The order ID to look up') }}/status",
+        "method": "GET"
+      },
+      "id": "e5f6a7b8-c9d0-4234-ef01-345678901234",
+      "name": "HTTP Request Tool",
+      "type": "@n8n/n8n-nodes-langchain.toolHttpRequest",
+      "typeVersion": 1.1,
+      "position": [660, 500]
+    }
+  ],
+  "connections": {
+    "When chat message received": {
+      "main": [[{ "node": "AI Agent", "type": "main", "index": 0 }]]
+    },
+    "OpenAI Chat Model": {
+      "ai_languageModel": [[{ "node": "AI Agent", "type": "ai_languageModel", "index": 0 }]]
+    },
+    "Window Buffer Memory": {
+      "ai_memory": [[{ "node": "AI Agent", "type": "ai_memory", "index": 0 }]]
+    },
+    "HTTP Request Tool": {
+      "ai_tool": [[{ "node": "AI Agent", "type": "ai_tool", "index": 0 }]]
+    }
+  },
+  "pinData": {},
+  "settings": {
+    "executionOrder": "v1"
+  }
+}
+```
+
 ## Common mistake
 
 Forgetting to attach a **Chat Model** node — the AI Agent node cannot run without one connected to its Model input, and n8n will show a red error on the node until you do. Also, adding too many tools with vague names/descriptions confuses the agent about which tool to pick; give each tool a short, specific description of exactly when to use it.

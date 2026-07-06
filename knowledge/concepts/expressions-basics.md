@@ -40,6 +40,90 @@ You can also mix plain text with expressions:
 Hello {{ $json.firstName }}, your order #{{ $json.orderId }} shipped on {{ $now.toFormat('dd LLL yyyy') }}.
 ```
 
+## Ready-to-paste example
+
+This complete workflow uses a Set node with expressions that reference data from a prior node, showing several common expression patterns together — import it and inspect the Set node's fields to see live expressions.
+
+```json
+{
+  "name": "Expressions Demo",
+  "nodes": [
+    {
+      "parameters": {},
+      "id": "4c6e4f1d-4444-4a2b-8c3d-000000000001",
+      "name": "When clicking 'Execute workflow'",
+      "type": "n8n-nodes-base.manualTrigger",
+      "typeVersion": 1,
+      "position": [240, 300]
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "assign-1",
+              "name": "firstName",
+              "value": "<PLACEHOLDER_FIRST_NAME>",
+              "type": "string"
+            },
+            {
+              "id": "assign-2",
+              "name": "orderId",
+              "value": "1001",
+              "type": "string"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "id": "4c6e4f1d-4444-4a2b-8c3d-000000000002",
+      "name": "Set Sample Data",
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [460, 300]
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "assign-3",
+              "name": "greeting",
+              "value": "={{ 'Hello ' + $json.firstName + ', your order #' + $json.orderId + ' shipped on ' + $now.toFormat('dd LLL yyyy') }}",
+              "type": "string"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "id": "4c6e4f1d-4444-4a2b-8c3d-000000000003",
+      "name": "Build Greeting",
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [680, 300]
+    }
+  ],
+  "connections": {
+    "When clicking 'Execute workflow'": {
+      "main": [
+        [
+          { "node": "Set Sample Data", "type": "main", "index": 0 }
+        ]
+      ]
+    },
+    "Set Sample Data": {
+      "main": [
+        [
+          { "node": "Build Greeting", "type": "main", "index": 0 }
+        ]
+      ]
+    }
+  },
+  "pinData": {},
+  "settings": { "executionOrder": "v1" }
+}
+```
+
 ## Common mistake
 
 Forgetting the double curly braces, or only using one `{`. If you type `$json.email` without `{{ }}`, n8n treats it as plain text, not a live reference — the field will literally show `$json.email` instead of the actual email address. Always wrap expressions in `{{ }}`.

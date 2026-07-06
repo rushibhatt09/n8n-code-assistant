@@ -35,4 +35,80 @@ The Aggregate node takes many items flowing through your workflow and merges the
 }
 ```
 
+## Ready-to-paste example
+
+Pasting this into n8n (Ctrl+V on the canvas) gives you a Manual Trigger with sample order items feeding an Aggregate node that bundles every item's `email` field into one array.
+
+```json
+{
+  "name": "Aggregate Emails Example",
+  "nodes": [
+    {
+      "parameters": {},
+      "id": "a1b2c3d4-0001-4a11-8b11-000000000001",
+      "name": "When clicking 'Execute workflow'",
+      "type": "n8n-nodes-base.manualTrigger",
+      "typeVersion": 1,
+      "position": [460, 300]
+    },
+    {
+      "parameters": {
+        "mode": "manual",
+        "duplicateItem": false,
+        "assignments": {
+          "assignments": [
+            {
+              "name": "email",
+              "type": "string",
+              "value": "customer1@example.com"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "id": "a1b2c3d4-0002-4a11-8b11-000000000002",
+      "name": "Sample Orders",
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [680, 300]
+    },
+    {
+      "parameters": {
+        "aggregate": "aggregateIndividualFields",
+        "fieldsToAggregate": {
+          "fieldToAggregate": [
+            { "fieldToAggregate": "email", "renameField": false }
+          ]
+        }
+      },
+      "id": "a1b2c3d4-0003-4a11-8b11-000000000003",
+      "name": "Aggregate",
+      "type": "n8n-nodes-base.aggregate",
+      "typeVersion": 1,
+      "position": [900, 300]
+    }
+  ],
+  "connections": {
+    "When clicking 'Execute workflow'": {
+      "main": [
+        [
+          { "node": "Sample Orders", "type": "main", "index": 0 }
+        ]
+      ]
+    },
+    "Sample Orders": {
+      "main": [
+        [
+          { "node": "Aggregate", "type": "main", "index": 0 }
+        ]
+      ]
+    }
+  },
+  "pinData": {},
+  "settings": {
+    "executionOrder": "v1"
+  }
+}
+```
+
 Common mistake: expecting Aggregate to "summarize" data with sums or averages, like a spreadsheet total. Aggregate only bundles items into an array — it doesn't do math. To calculate sums, counts, or averages, use a Code node or the Summarize node instead.

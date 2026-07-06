@@ -38,4 +38,57 @@ As workflows grow, they get hard to read. The **NoOp** ("No Operation, do nothin
 }
 ```
 
+## Ready-to-paste example
+
+Pasting this creates a small, clearly organized workflow: a Manual Trigger, a validation step marked complete with a renamed NoOp node, and a Sticky Note documenting what the workflow does.
+
+```json
+{
+  "name": "Organized Order Sync Example",
+  "nodes": [
+    {
+      "parameters": {},
+      "id": "b3c4d5e6-0001-4b44-8c44-000000000001",
+      "name": "When clicking 'Execute workflow'",
+      "type": "n8n-nodes-base.manualTrigger",
+      "typeVersion": 1,
+      "position": [460, 320]
+    },
+    {
+      "parameters": {},
+      "id": "b3c4d5e6-0002-4b44-8c44-000000000002",
+      "name": "Validation Complete",
+      "type": "n8n-nodes-base.noOp",
+      "typeVersion": 1,
+      "position": [680, 320]
+    },
+    {
+      "parameters": {
+        "content": "## Order Sync Workflow\n- Pulls orders every hour\n- Skips orders already marked 'synced'\n- Contact: <YOUR_TEAM_EMAIL> if this fails",
+        "height": 180,
+        "width": 320
+      },
+      "id": "b3c4d5e6-0003-4b44-8c44-000000000003",
+      "name": "Sticky Note",
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [460, 100]
+    }
+  ],
+  "connections": {
+    "When clicking 'Execute workflow'": {
+      "main": [
+        [
+          { "node": "Validation Complete", "type": "main", "index": 0 }
+        ]
+      ]
+    }
+  },
+  "pinData": {},
+  "settings": {
+    "executionOrder": "v1"
+  }
+}
+```
+
 Common mistake: leaving every node with its default name (multiple nodes all called "HTTP Request" or "IF"). This makes error messages and execution logs nearly useless because you can't tell which "HTTP Request" failed. Always rename nodes to describe their purpose, e.g. "Get Customer From CRM" instead of the generic default.

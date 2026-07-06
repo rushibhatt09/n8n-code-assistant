@@ -49,4 +49,73 @@ return {
 };
 ```
 
+## Ready-to-paste example
+
+Pasting this creates a Manual Trigger feeding sample price/quantity data into a Code node that calculates a total and a bulk-order flag for each item.
+
+```json
+{
+  "name": "Code Node Total Calculation Example",
+  "nodes": [
+    {
+      "parameters": {},
+      "id": "b1c2d3e4-0001-4b22-8c22-000000000001",
+      "name": "When clicking 'Execute workflow'",
+      "type": "n8n-nodes-base.manualTrigger",
+      "typeVersion": 1,
+      "position": [460, 300]
+    },
+    {
+      "parameters": {
+        "mode": "manual",
+        "duplicateItem": false,
+        "assignments": {
+          "assignments": [
+            { "name": "price", "type": "number", "value": 25 },
+            { "name": "quantity", "type": "number", "value": 12 }
+          ]
+        },
+        "options": {}
+      },
+      "id": "b1c2d3e4-0002-4b22-8c22-000000000002",
+      "name": "Sample Order",
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [680, 300]
+    },
+    {
+      "parameters": {
+        "mode": "runOnceForAllItems",
+        "jsCode": "const items = $input.all();\n\nconst results = items.map(item => {\n  const price = item.json.price;\n  const qty = item.json.quantity;\n  return {\n    json: {\n      ...item.json,\n      total: price * qty,\n      isBulkOrder: qty >= 10\n    }\n  };\n});\n\nreturn results;"
+      },
+      "id": "b1c2d3e4-0003-4b22-8c22-000000000003",
+      "name": "Calculate Total",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [900, 300]
+    }
+  ],
+  "connections": {
+    "When clicking 'Execute workflow'": {
+      "main": [
+        [
+          { "node": "Sample Order", "type": "main", "index": 0 }
+        ]
+      ]
+    },
+    "Sample Order": {
+      "main": [
+        [
+          { "node": "Calculate Total", "type": "main", "index": 0 }
+        ]
+      ]
+    }
+  },
+  "pinData": {},
+  "settings": {
+    "executionOrder": "v1"
+  }
+}
+```
+
 Common mistake: forgetting to wrap each returned object in `{ json: {...} }`. If you `return items.map(i => i.json.total)` (a plain array of numbers), n8n will error or produce broken data — every item passed between nodes must be an object with a `json` key.

@@ -19,8 +19,9 @@ Most APIs cap how many records they return in a single call (a "page") and expec
 4. Set the **Continue** condition — usually "Until a field is empty" (e.g. stop when `next_cursor` is null) or a fixed number of pages.
 5. Map the parameter that needs to increment or update, using an expression that reads the previous response.
 
+Offset-based pagination:
+
 ```json
-// Example: offset-based pagination
 {
   "parameters": {
     "offset": "={{ $pageCount * 100 }}"
@@ -29,8 +30,9 @@ Most APIs cap how many records they return in a single call (a "page") and expec
 }
 ```
 
+Cursor-based pagination:
+
 ```json
-// Example: cursor-based pagination
 {
   "parameters": {
     "cursor": "={{ $response.body.next_cursor }}"
@@ -41,6 +43,54 @@ Most APIs cap how many records they return in a single call (a "page") and expec
 ```
 
 6. Test with "Execute step" and confirm the **Items** count in the output matches the total the API reports, not just one page's worth.
+
+## Drop-in fix
+
+Paste this complete pagination block into the HTTP Request node (Options > Pagination, JSON view) to page through a cursor-based API automatically until the API signals there's nothing left — adjust the field names to match your API's response shape.
+
+```json
+{
+  "method": "GET",
+  "url": "https://<YOUR_API_HOST>/<YOUR_ENDPOINT>",
+  "authentication": "genericCredentialType",
+  "options": {
+    "pagination": {
+      "pagination": {
+        "paginationMode": "responseContainsNextURL",
+        "nextURL": "={{ $response.body.next_page_url }}",
+        "limitPagesFetched": true,
+        "maxRequests": 100,
+        "requestInterval": 250
+      }
+    }
+  }
+}
+```
+
+If the API instead uses a page number or offset parameter rather than a next-page URL, use this variant:
+
+```json
+{
+  "method": "GET",
+  "url": "https://<YOUR_API_HOST>/<YOUR_ENDPOINT>",
+  "qs": {
+    "offset": "={{ $pageCount * 100 }}",
+    "limit": 100
+  },
+  "options": {
+    "pagination": {
+      "pagination": {
+        "paginationMode": "updateAParameterInEachRequest",
+        "paginationCompleteWhen": "responseIsEmpty",
+        "limitPagesFetched": true,
+        "maxRequests": 100
+      }
+    }
+  }
+}
+```
+
+Replace `<YOUR_API_HOST>` and `<YOUR_ENDPOINT>` with the real API, and swap `next_page_url` / `offset` / `limit` for the exact field names in that API's documentation.
 
 ### Common mistake
 

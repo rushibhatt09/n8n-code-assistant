@@ -36,6 +36,74 @@ const text = buffer.toString('utf-8');
 return [{ json: { preview: text.slice(0, 200) }, binary: item.binary }];
 ```
 
+## Ready-to-paste example
+
+This complete workflow downloads a file from a URL as binary data and writes it to disk — import it via the n8n menu (three dots → Import from File/URL), then edit the URL and file path.
+
+```json
+{
+  "name": "Download File and Save to Disk",
+  "nodes": [
+    {
+      "parameters": {},
+      "id": "1f9b6e3a-1111-4a2b-8c3d-000000000001",
+      "name": "When clicking 'Execute workflow'",
+      "type": "n8n-nodes-base.manualTrigger",
+      "typeVersion": 1,
+      "position": [240, 300]
+    },
+    {
+      "parameters": {
+        "url": "<FILE_DOWNLOAD_URL>",
+        "options": {
+          "response": {
+            "response": {
+              "responseFormat": "file",
+              "outputPropertyName": "data"
+            }
+          }
+        }
+      },
+      "id": "1f9b6e3a-1111-4a2b-8c3d-000000000002",
+      "name": "HTTP Request",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [460, 300]
+    },
+    {
+      "parameters": {
+        "operation": "write",
+        "fileName": "<C:\\path\\to\\save\\downloaded-file.pdf>",
+        "dataPropertyName": "data"
+      },
+      "id": "1f9b6e3a-1111-4a2b-8c3d-000000000003",
+      "name": "Read/Write Files from Disk",
+      "type": "n8n-nodes-base.readWriteFile",
+      "typeVersion": 1,
+      "position": [680, 300]
+    }
+  ],
+  "connections": {
+    "When clicking 'Execute workflow'": {
+      "main": [
+        [
+          { "node": "HTTP Request", "type": "main", "index": 0 }
+        ]
+      ]
+    },
+    "HTTP Request": {
+      "main": [
+        [
+          { "node": "Read/Write Files from Disk", "type": "main", "index": 0 }
+        ]
+      ]
+    }
+  },
+  "pinData": {},
+  "settings": { "executionOrder": "v1" }
+}
+```
+
 ## Common mistake
 
 Losing the binary data when passing items through a Code node. If you build a new return array and forget to copy over `binary: item.binary`, the file attachment disappears from that item going forward, even though the JSON still looks fine. Always explicitly carry the `binary` key forward when you touch an item in code.

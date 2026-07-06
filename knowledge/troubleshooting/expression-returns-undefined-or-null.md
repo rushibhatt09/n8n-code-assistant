@@ -31,6 +31,42 @@ return $input.all().map(item => {
 
 5. Add a **Filter** or **IF** node after normalization to route items still missing critical data to a separate path (e.g. for manual review) instead of letting `null` silently flow to an API call further downstream.
 
+## Drop-in fix
+
+Paste this Code node in place of the node feeding your unreliable expression — it normalizes several possible field name/shape variants into one reliable field before anything downstream reads it, so expressions like `{{ $json.customerName }}` always resolve to something usable.
+
+```javascript
+// Drop-in Code node: normalize inconsistent field shapes into stable output fields
+return $input.all().map(item => {
+  const data = item.json ?? {};
+
+  const customerName =
+    data.customer?.name ??
+    data.full_name ??
+    data.name ??
+    "<DEFAULT_NAME>";
+
+  const customerEmail =
+    data.customer?.email ??
+    data.email_address ??
+    data.email ??
+    null;
+
+  const isComplete = customerEmail !== null;
+
+  return {
+    json: {
+      ...data,
+      customerName,
+      customerEmail,
+      needsReview: !isComplete,
+    },
+  };
+});
+```
+
+Then use the normalized fields safely downstream, e.g. `{{ $json.customerName }}` and `{{ $json.customerEmail ?? "no email on file" }}`, and route items where `needsReview` is `true` to a separate branch with an **IF** node.
+
 ### Common mistake
 
 Building and testing the workflow using only the one sample item n8n cached from your first test run, which happens to have every field filled in — then being surprised weeks later when real-world data with missing or differently-shaped fields quietly breaks downstream steps.

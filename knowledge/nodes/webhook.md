@@ -37,4 +37,88 @@ curl -X POST "https://your-n8n-domain.com/webhook/new-order" \
 
 Incoming data appears in later nodes as `{{ $json.body.orderId }}` (n8n nests the payload under `body`).
 
+## Ready-to-paste example
+
+Pasting this creates a complete webhook workflow: a Webhook node listening on `/new-order`, a Set node that extracts the order fields, and a Respond to Webhook node that immediately confirms receipt.
+
+```json
+{
+  "name": "New Order Webhook Example",
+  "nodes": [
+    {
+      "parameters": {
+        "httpMethod": "POST",
+        "path": "new-order",
+        "responseMode": "responseNode",
+        "options": {}
+      },
+      "id": "a3b4c5d6-0001-4a33-8b33-000000000001",
+      "name": "Webhook",
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 2,
+      "webhookId": "a3b4c5d6-0001-4a33-8b33-000000000001",
+      "position": [460, 300]
+    },
+    {
+      "parameters": {
+        "mode": "manual",
+        "duplicateItem": false,
+        "assignments": {
+          "assignments": [
+            {
+              "name": "orderId",
+              "type": "number",
+              "value": "={{ $json.body.orderId }}"
+            },
+            {
+              "name": "customer",
+              "type": "string",
+              "value": "={{ $json.body.customer }}"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "id": "a3b4c5d6-0002-4a33-8b33-000000000002",
+      "name": "Extract Order Fields",
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [680, 300]
+    },
+    {
+      "parameters": {
+        "respondWith": "json",
+        "responseBody": "={{ { \"received\": true, \"orderId\": $json.orderId } }}",
+        "options": {}
+      },
+      "id": "a3b4c5d6-0003-4a33-8b33-000000000003",
+      "name": "Respond to Webhook",
+      "type": "n8n-nodes-base.respondToWebhook",
+      "typeVersion": 1.1,
+      "position": [900, 300]
+    }
+  ],
+  "connections": {
+    "Webhook": {
+      "main": [
+        [
+          { "node": "Extract Order Fields", "type": "main", "index": 0 }
+        ]
+      ]
+    },
+    "Extract Order Fields": {
+      "main": [
+        [
+          { "node": "Respond to Webhook", "type": "main", "index": 0 }
+        ]
+      ]
+    }
+  },
+  "pinData": {},
+  "settings": {
+    "executionOrder": "v1"
+  }
+}
+```
+
 Common mistake: testing with the **Test URL**, confirming it works, then wondering why nothing happens once real traffic hits it. The Test URL only fires once per "Listen for test event" click and stops working after that single call — you must switch to the **Production URL** and Activate the workflow for it to keep working continuously.

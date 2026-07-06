@@ -31,6 +31,68 @@ return $input.all();
 
 6. Re-run and inspect any items flagged with `parseError` to see what the API actually sent back.
 
+## Drop-in fix
+
+Paste this over your Code node's parsing logic — it safely handles JSON, HTML error pages, empty bodies, and already-parsed objects, and attaches a clear, human-readable error message instead of crashing.
+
+```javascript
+// Drop-in Code node: safe JSON parsing with helpful error messages
+const results = [];
+
+for (const item of $input.all()) {
+  const raw = item.json.rawBody ?? item.json.data ?? item.json.body ?? item.json;
+
+  // Already an object? Nothing to parse.
+  if (raw && typeof raw === "object") {
+    results.push({ json: { ...item.json, parsed: raw, parseError: null } });
+    continue;
+  }
+
+  const text = raw == null ? "" : String(raw);
+
+  if (text.trim().length === 0) {
+    results.push({
+      json: {
+        ...item.json,
+        parsed: null,
+        parseError: "Response body was empty — check the API call that produced it.",
+      },
+    });
+    continue;
+  }
+
+  if (text.trim().startsWith("<")) {
+    results.push({
+      json: {
+        ...item.json,
+        parsed: null,
+        parseError: "Received HTML instead of JSON — likely an auth failure, wrong URL, or server error page.",
+        rawPreview: text.slice(0, 300),
+      },
+    });
+    continue;
+  }
+
+  try {
+    const parsed = JSON.parse(text);
+    results.push({ json: { ...item.json, parsed, parseError: null } });
+  } catch (err) {
+    results.push({
+      json: {
+        ...item.json,
+        parsed: null,
+        parseError: `Invalid JSON: ${err.message}`,
+        rawPreview: text.slice(0, 300),
+      },
+    });
+  }
+}
+
+return results;
+```
+
+Add a **Filter** node after this that keeps only items where `parseError` is `null`, and send the rest to a separate branch (e.g. Slack/email alert showing `rawPreview`) so bad responses are visible instead of silently breaking the workflow.
+
 ### Common mistake
 
 Assuming an API always returns JSON, even on errors. Many APIs return HTML error pages for 500s, or plain-text messages for rate limits — parsing those as JSON is what triggers "Unexpected token," not a problem with your JSON.parse code itself.

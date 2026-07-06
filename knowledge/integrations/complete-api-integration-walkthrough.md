@@ -77,7 +77,7 @@ You almost never need to write this from scratch — take the JSON above and cha
 
 1. **In the HTTP Request node**, change `method` and `url` to your API's endpoint. For `POST`/`PUT`/`PATCH`, also add:
 
-```json
+```text
 "sendBody": true,
 "contentType": "json",
 "jsonBody": "{\n  \"customerId\": \"{{ $json.customerId }}\",\n  \"action\": \"sync\"\n}"

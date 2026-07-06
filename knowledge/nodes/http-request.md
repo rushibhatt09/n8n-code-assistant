@@ -44,4 +44,84 @@ curl -X POST "https://api.example.com/v1/customers" \
   -d '{"name":"Jane Doe","email":"jane@example.com"}'
 ```
 
+## Ready-to-paste example
+
+Pasting this creates a Manual Trigger connected to an HTTP Request node that POSTs a new customer record to an API with headers and a JSON body already configured.
+
+```json
+{
+  "name": "HTTP Request Create Customer Example",
+  "nodes": [
+    {
+      "parameters": {},
+      "id": "e1f2a3b4-0001-4e55-8f55-000000000001",
+      "name": "When clicking 'Execute workflow'",
+      "type": "n8n-nodes-base.manualTrigger",
+      "typeVersion": 1,
+      "position": [460, 300]
+    },
+    {
+      "parameters": {
+        "mode": "manual",
+        "duplicateItem": false,
+        "assignments": {
+          "assignments": [
+            { "name": "customerName", "type": "string", "value": "Jane Doe" },
+            { "name": "email", "type": "string", "value": "jane@example.com" }
+          ]
+        },
+        "options": {}
+      },
+      "id": "e1f2a3b4-0002-4e55-8f55-000000000002",
+      "name": "Sample Customer",
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [680, 300]
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "<YOUR_API_URL>/v1/customers",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            { "name": "Content-Type", "value": "application/json" },
+            { "name": "Authorization", "value": "Bearer <YOUR_API_TOKEN>" }
+          ]
+        },
+        "sendBody": true,
+        "contentType": "json",
+        "jsonBody": "={{ { \"name\": $json.customerName, \"email\": $json.email } }}",
+        "options": {}
+      },
+      "id": "e1f2a3b4-0003-4e55-8f55-000000000003",
+      "name": "Create Customer",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [900, 300]
+    }
+  ],
+  "connections": {
+    "When clicking 'Execute workflow'": {
+      "main": [
+        [
+          { "node": "Sample Customer", "type": "main", "index": 0 }
+        ]
+      ]
+    },
+    "Sample Customer": {
+      "main": [
+        [
+          { "node": "Create Customer", "type": "main", "index": 0 }
+        ]
+      ]
+    }
+  },
+  "pinData": {},
+  "settings": {
+    "executionOrder": "v1"
+  }
+}
+```
+
 Common mistake: forgetting to turn on **Send Body** or **Send Headers** toggles. In n8n, filling in the fields below these toggles does nothing if the toggle itself is off — the node will silently send the request without your body or headers, and you'll wonder why the API rejects it or returns unexpected results.

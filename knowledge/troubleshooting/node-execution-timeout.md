@@ -18,8 +18,9 @@ n8n (and the services it calls) will only wait so long for a response before giv
 5. If calling an external API, check if it offers a faster/paginated endpoint instead of one huge request.
 6. Add retry logic so a slow-but-eventually-successful call doesn't just fail outright.
 
+In the HTTP Request node's **Options**:
+
 ```json
-// HTTP Request node > Options
 {
   "timeout": 60000,
   "retry": {
@@ -30,6 +31,50 @@ n8n (and the services it calls) will only wait so long for a response before giv
 ```
 
 7. Re-run and watch the **Executions** tab to confirm the node now finishes within the new limit.
+
+## Drop-in fix
+
+Paste this into the HTTP Request node's Options (JSON view, or recreate each field in the UI) to raise the per-request timeout and add automatic retries, and paste the second block into the workflow's Settings to raise the overall execution limit — both need to be increased together.
+
+```json
+{
+  "options": {
+    "timeout": 60000,
+    "retry": {
+      "maxTries": 3,
+      "waitBetween": 2000
+    }
+  }
+}
+```
+
+```json
+{
+  "executionTimeout": 3600,
+  "saveDataErrorExecution": "all",
+  "saveDataSuccessExecution": "all",
+  "timezone": "<YOUR_TIMEZONE>"
+}
+```
+
+If a **Code** node is the slow part, wrap the heavy work in batches instead of raising timeouts indefinitely:
+
+```javascript
+// Code node: process large arrays in chunks instead of all at once
+const items = $input.all();
+const batchSize = 100;
+const output = [];
+
+for (let i = 0; i < items.length; i += batchSize) {
+  const batch = items.slice(i, i + batchSize);
+  for (const item of batch) {
+    // <YOUR PER-ITEM LOGIC HERE>
+    output.push({ json: item.json });
+  }
+}
+
+return output;
+```
 
 ### Common mistake
 

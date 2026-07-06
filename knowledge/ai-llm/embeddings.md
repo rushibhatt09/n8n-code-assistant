@@ -34,6 +34,65 @@ You don't call an Embeddings node on its own — it's always plugged into a Vect
 }
 ```
 
+## Ready-to-paste example
+
+This workflow embeds a piece of text with Embeddings OpenAI and inserts it into an In-Memory Vector Store for later searching.
+
+```json
+{
+  "name": "Insert Text Into Vector Store",
+  "nodes": [
+    {
+      "parameters": {},
+      "id": "a1b2c3d4-0055-4890-abcd-ef1234567890",
+      "name": "Manual Trigger",
+      "type": "n8n-nodes-base.manualTrigger",
+      "typeVersion": 1,
+      "position": [220, 300]
+    },
+    {
+      "parameters": {
+        "mode": "insert",
+        "memoryKey": "dermatouch_docs"
+      },
+      "id": "b2c3d4e5-0066-4901-bcde-f12345678901",
+      "name": "In-Memory Vector Store",
+      "type": "@n8n/n8n-nodes-langchain.vectorStoreInMemory",
+      "typeVersion": 1.1,
+      "position": [440, 300]
+    },
+    {
+      "parameters": {
+        "model": "text-embedding-3-small"
+      },
+      "id": "c3d4e5f6-0077-4012-cdef-123456789012",
+      "name": "Embeddings OpenAI",
+      "type": "@n8n/n8n-nodes-langchain.embeddingsOpenAi",
+      "typeVersion": 1.2,
+      "position": [440, 500],
+      "credentials": {
+        "openAiApi": {
+          "id": "2",
+          "name": "Company OpenAI Key"
+        }
+      }
+    }
+  ],
+  "connections": {
+    "Manual Trigger": {
+      "main": [[{ "node": "In-Memory Vector Store", "type": "main", "index": 0 }]]
+    },
+    "Embeddings OpenAI": {
+      "ai_embedding": [[{ "node": "In-Memory Vector Store", "type": "ai_embedding", "index": 0 }]]
+    }
+  },
+  "pinData": {},
+  "settings": {
+    "executionOrder": "v1"
+  }
+}
+```
+
 ## Common mistake
 
 Switching embedding models (e.g. from `text-embedding-3-small` to `text-embedding-3-large`) after you've already saved data to a vector store — different models produce different vector formats/sizes, so searches will fail or return nonsense. If you change the embeddings model, re-insert all your documents from scratch with the new model.

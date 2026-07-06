@@ -36,6 +36,31 @@ const region = $env.DEFAULT_REGION;
 return [{ json: { region } }];
 ```
 
+## Ready-to-paste example
+
+This is a complete `.env` file you can save next to your `docker-compose.yml` (or source in your shell), plus the matching expression syntax to read one of its values inside a workflow.
+
+```
+# .env
+API_BASE_URL=<YOUR_API_BASE_URL>
+DEFAULT_REGION=<YOUR_DEFAULT_REGION>
+N8N_ENCRYPTION_KEY=<YOUR_ENCRYPTION_KEY>
+GENERIC_TIMEZONE=<YOUR_TIMEZONE>
+```
+
+Read it from any expression field in a node:
+
+```
+{{ $env.API_BASE_URL }}/v1/customers
+```
+
+Or from inside a Code node:
+
+```javascript
+const region = $env.DEFAULT_REGION;
+return [{ json: { region } }];
+```
+
 ## Common mistake
 
 Expecting environment variables to update instantly after editing the `.env` file. n8n only reads environment variables when it starts up — you must restart the n8n service (e.g., `docker compose restart n8n`) for changes to take effect. Editing the file alone does nothing until n8n reloads.

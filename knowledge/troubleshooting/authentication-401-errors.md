@@ -18,13 +18,63 @@ This means the API you're calling doesn't recognize you as a valid, allowed call
 5. If using OAuth2 credentials, click **Reconnect** on the credential to refresh the token, since access tokens often expire after a set time.
 6. Check the URL for typos — hitting the wrong endpoint or wrong account ID can also return 401/403 even with a good token.
 
+Example manual header auth setup in the HTTP Request node's headers:
+
 ```json
-// Example manual header auth setup in HTTP Request node
 {
   "Authorization": "Bearer {{ $credentials.apiToken }}",
   "Content-Type": "application/json"
 }
 ```
+
+## Drop-in fix
+
+Paste this into the HTTP Request node's JSON parameters (or recreate the equivalent settings in the UI) to send a clean, correctly-formatted Bearer token with no trailing whitespace and a fallback error if the credential is missing.
+
+```json
+{
+  "authentication": "genericCredentialType",
+  "genericAuthType": "httpHeaderAuth",
+  "sendHeaders": true,
+  "headerParameters": {
+    "parameters": [
+      {
+        "name": "Authorization",
+        "value": "=Bearer {{ ($credentials.apiToken || '').trim() }}"
+      },
+      {
+        "name": "Content-Type",
+        "value": "application/json"
+      }
+    ]
+  },
+  "options": {
+    "response": {
+      "response": {
+        "neverError": false
+      }
+    }
+  }
+}
+```
+
+If you'd rather validate the token before every call, add a small **Code** node right before the HTTP Request node:
+
+```javascript
+// Code node: fail fast with a clear message if the token is missing/malformed
+for (const item of $input.all()) {
+  const token = $credentials?.apiToken ?? item.json.apiToken;
+  if (!token || typeof token !== "string" || token.trim().length === 0) {
+    throw new Error(
+      "Missing or empty API token. Check the credential named '<YOUR_CREDENTIAL_NAME>' and re-save it."
+    );
+  }
+  item.json.authToken = token.trim();
+}
+return $input.all();
+```
+
+Replace `<YOUR_CREDENTIAL_NAME>` with the actual credential name, and swap `apiToken` for whatever field your API's docs call the key/token.
 
 ### Common mistake
 

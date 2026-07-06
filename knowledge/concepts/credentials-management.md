@@ -28,6 +28,57 @@ Credential: "My API Key" (selected from dropdown)
 
 If a service isn't built-in, use the **HTTP Request** node with a "Generic Credential Type" like Header Auth, and store the secret value there instead of pasting it directly into the URL or body fields.
 
+## Ready-to-paste example
+
+This complete workflow shows how an HTTP Request node references a saved credential by name and ID (the way it looks when you export a workflow) — import it, then in the n8n UI reselect or recreate the credential named below since the actual secret value is never stored in this file.
+
+```json
+{
+  "name": "Call API Using Saved Credential",
+  "nodes": [
+    {
+      "parameters": {},
+      "id": "2a8c7d4b-2222-4a2b-8c3d-000000000001",
+      "name": "When clicking 'Execute workflow'",
+      "type": "n8n-nodes-base.manualTrigger",
+      "typeVersion": 1,
+      "position": [240, 300]
+    },
+    {
+      "parameters": {
+        "url": "https://api.example.com/v1/customers",
+        "authentication": "predefinedCredentialType",
+        "nodeCredentialType": "httpHeaderAuth"
+      },
+      "id": "2a8c7d4b-2222-4a2b-8c3d-000000000002",
+      "name": "HTTP Request",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [460, 300],
+      "credentials": {
+        "httpHeaderAuth": {
+          "id": "<YOUR_CREDENTIAL_ID>",
+          "name": "<YOUR_SAVED_CREDENTIAL_NAME>"
+        }
+      }
+    }
+  ],
+  "connections": {
+    "When clicking 'Execute workflow'": {
+      "main": [
+        [
+          { "node": "HTTP Request", "type": "main", "index": 0 }
+        ]
+      ]
+    }
+  },
+  "pinData": {},
+  "settings": { "executionOrder": "v1" }
+}
+```
+
+Note: n8n encrypts credential secrets at rest and deliberately excludes the actual key/password value from workflow JSON exports — only the credential's name/ID reference is included, so importing this workflow elsewhere will show the credential field as unset until you pick or recreate one with real values.
+
 ## Common mistake
 
 Pasting an API key or password directly into a node's text field (like the URL or a header value) instead of saving it as a credential. This exposes the secret in plain text in your workflow JSON, in execution logs, and to anyone who can view or export the workflow. Always store secrets as credentials, not as literal text.

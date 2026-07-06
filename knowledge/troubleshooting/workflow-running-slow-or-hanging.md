@@ -31,6 +31,42 @@ return batches.map(batch => ({ json: { ids: batch.map(b => b.json.id) } }));
 
 7. Re-run with the new batch size and compare total execution time in the Executions tab.
 
+## Drop-in fix
+
+Paste this settings JSON into the workflow's Settings panel (three-dot menu > Settings) to stop the editor from choking on huge execution logs, and use the Code node below to batch per-item work instead of looping thousands of times.
+
+```json
+{
+  "saveManualExecutions": false,
+  "saveDataErrorExecution": "all",
+  "saveDataSuccessExecution": "none",
+  "executionTimeout": 3600
+}
+```
+
+```javascript
+// Drop-in Code node: group items into batches of <BATCH_SIZE> for bulk processing
+// instead of relying on Split In Batches with size 1
+const items = $input.all();
+const batchSize = 100; // adjust to match what the target API allows per call
+
+const batches = [];
+for (let i = 0; i < items.length; i += batchSize) {
+  batches.push(items.slice(i, i + batchSize));
+}
+
+// Emit one item per batch — feed this into a single HTTP Request node
+// that accepts an array of IDs/records per call, instead of one call per item
+return batches.map(batch => ({
+  json: {
+    batchSize: batch.length,
+    ids: batch.map(b => b.json.id ?? b.json["<YOUR_ID_FIELD>"]),
+  },
+}));
+```
+
+Replace `<YOUR_ID_FIELD>` with whatever field actually identifies each record if it isn't already named `id`, and adjust `batchSize` to whatever the target API's bulk endpoint allows per request.
+
 ### Common mistake
 
 Leaving **Split In Batches** at its default batch size of 1 when processing thousands of rows — this forces the workflow to loop thousands of times instead of tens of times, which is almost always the real source of the slowdown, not n8n itself.
