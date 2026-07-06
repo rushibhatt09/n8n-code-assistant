@@ -103,7 +103,7 @@ git init
 git add .
 git commit -m "Initial commit: n8n Code Assistant"
 git branch -M main
-git remote add origin https://github.com/<your-username>/n8n-code-assistant.git
+git remote add origin https://github.com/<your-username>/n8n-helper.git
 git push -u origin main
 ```
 
