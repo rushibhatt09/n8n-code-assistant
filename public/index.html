@@ -12,8 +12,13 @@
       <span class="logo">🧩</span>
       <div>
         <h1>n8n Code Assistant</h1>
-        <p>Search n8n node setups, API integrations &amp; AI/LLM workflows — or just ask in plain English.</p>
+        <p>Copy-paste ready code for n8n nodes, API integrations &amp; AI/LLM workflows — or just ask in plain English.</p>
       </div>
+    </div>
+    <div class="brand-badges">
+      <span class="chip">100% local</span>
+      <span class="chip">Copy-paste ready</span>
+      <span id="article-count-chip" class="chip">Loading…</span>
     </div>
   </header>
 
@@ -21,8 +26,10 @@
     <aside class="sidebar">
       <h2>Categories</h2>
       <ul id="category-list" class="category-list">
-        <li data-category="">
-          <button class="cat-btn active" data-category="">All</button>
+        <li>
+          <button class="cat-btn active" data-category="">
+            <span class="cat-icon">📚</span><span class="cat-label">All</span>
+          </button>
         </li>
       </ul>
       <div class="api-status" id="api-status"></div>
@@ -43,11 +50,20 @@
         <input id="search-input" type="text" placeholder="Or browse/search the knowledge base (e.g. 'webhook', 'Slack', 'RAG', 'error handling')..." />
       </div>
 
+      <div id="quick-topics" class="quick-topics hidden">
+        <span class="quick-topics-label">Popular:</span>
+        <div id="quick-topics-chips" class="quick-topics-chips"></div>
+      </div>
+
       <div id="results" class="results"></div>
 
       <div id="article-view" class="article-view hidden">
-        <button id="back-btn" class="back-btn">&larr; Back to results</button>
+        <div class="article-toolbar">
+          <button id="back-btn" class="back-btn">&larr; Back to results</button>
+          <nav id="breadcrumb" class="breadcrumb"></nav>
+        </div>
         <div id="article-content"></div>
+        <div id="related-articles" class="related-articles"></div>
       </div>
     </section>
   </main>
