@@ -40,4 +40,41 @@ Example field mapping as JSON:
 }
 ```
 
+## Quick copy-paste version (no credential setup)
+
+If you'd rather not use n8n's Credential system, you can hardcode your Airtable Personal Access Token directly into an **HTTP Request** node's headers — simplest for personal/local use, but anyone who opens this workflow file can read the token in plain text, so don't share or upload it while the real token is still in there.
+
+```json
+{
+  "method": "POST",
+  "url": "https://api.airtable.com/v0/<YOUR_BASE_ID>/<YOUR_TABLE_NAME>",
+  "authentication": "none",
+  "sendHeaders": true,
+  "headerParameters": {
+    "parameters": [
+      { "name": "Authorization", "value": "Bearer <YOUR_AIRTABLE_TOKEN>" },
+      { "name": "Content-Type", "value": "application/json" }
+    ]
+  },
+  "sendBody": true,
+  "specifyBody": "json",
+  "jsonBody": {
+    "fields": {
+      "Name": "Jane Doe",
+      "Email": "jane@example.com",
+      "Status": "New"
+    }
+  }
+}
+```
+
+Test it from a terminal first to confirm the token, base ID, and table name work before building the node:
+
+```bash
+curl -X POST "https://api.airtable.com/v0/<YOUR_BASE_ID>/<YOUR_TABLE_NAME>" \
+  -H "Authorization: Bearer <YOUR_AIRTABLE_TOKEN>" \
+  -H "Content-Type: application/json" \
+  -d '{"fields": {"Name": "Jane Doe", "Email": "jane@example.com", "Status": "New"}}'
+```
+
 **Common mistake:** Using field names that don't exactly match the column names in Airtable (including spelling and capitalization) — the node will silently fail to set that field or throw an "unknown field" error. Copy field names directly from the Airtable table header.

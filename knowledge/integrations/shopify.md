@@ -41,4 +41,26 @@ curl "https://your-shop.myshopify.com/admin/api/2024-01/orders.json" \
   -H "X-Shopify-Access-Token: shpat_yourtoken"
 ```
 
+## Quick copy-paste version (no credential setup)
+
+This approach puts your Shopify Admin API access token directly in the HTTP Request node instead of using n8n's Credential system — simplest for personal or local use, but anyone who can open this workflow can see the token, so don't share the workflow file with the token still in it.
+
+```json
+{
+  "method": "GET",
+  "url": "https://your-shop.myshopify.com/admin/api/2024-01/orders.json",
+  "sendHeaders": true,
+  "headerParameters": {
+    "X-Shopify-Access-Token": "<YOUR_SHOPIFY_ACCESS_TOKEN>"
+  }
+}
+```
+
+Test it directly with curl before building the node:
+
+```bash
+curl "https://your-shop.myshopify.com/admin/api/2024-01/orders.json" \
+  -H "X-Shopify-Access-Token: <YOUR_SHOPIFY_ACCESS_TOKEN>"
+```
+
 **Common mistake:** Requesting API scopes at app creation time that don't cover what your workflow needs later (e.g. forgetting `read_orders`). If a node returns a 403/permission error, go back into the custom app's configuration, add the missing scope, and reinstall the app.

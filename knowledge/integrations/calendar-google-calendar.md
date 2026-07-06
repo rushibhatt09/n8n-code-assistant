@@ -36,4 +36,36 @@ To trigger a workflow on new events instead, use the **Google Calendar Trigger**
 }
 ```
 
+## Quick copy-paste version (no credential setup)
+
+Google Calendar genuinely cannot be used with a simple static API key for creating events — Google requires OAuth2, where a short-lived access token is issued after you sign in and grant permission, and that token expires and needs refreshing. Because of this, using n8n's built-in **Google Calendar OAuth2 API** credential (Option A above) is actually the simplest path — it handles the sign-in and token refresh for you automatically. The direct HTTP call below is mainly useful for advanced users testing with a temporary access token (e.g. one pasted from Google's OAuth 2.0 Playground) before wiring up the full node.
+
+```json
+{
+  "method": "POST",
+  "url": "https://www.googleapis.com/calendar/v3/calendars/primary/events",
+  "authentication": "none",
+  "sendHeaders": true,
+  "headerParameters": {
+    "Authorization": "Bearer <YOUR_GOOGLE_OAUTH_ACCESS_TOKEN>"
+  },
+  "sendBody": true,
+  "contentType": "json",
+  "bodyParameters": {
+    "summary": "Consultation with Jane Doe",
+    "start": { "dateTime": "2026-07-10T14:00:00-05:00" },
+    "end": { "dateTime": "2026-07-10T14:30:00-05:00" }
+  }
+}
+```
+
+Test it directly with curl before building the node:
+
+```bash
+curl -X POST "https://www.googleapis.com/calendar/v3/calendars/primary/events" \
+  -H "Authorization: Bearer <YOUR_GOOGLE_OAUTH_ACCESS_TOKEN>" \
+  -H "Content-Type: application/json" \
+  -d '{"summary": "Consultation with Jane Doe", "start": {"dateTime": "2026-07-10T14:00:00-05:00"}, "end": {"dateTime": "2026-07-10T14:30:00-05:00"}}'
+```
+
 **Common mistake:** Forgetting to set the correct timezone in start/end times — Google Calendar interprets datetime strings literally, so an event meant for 2pm local time can appear at the wrong hour if the timezone offset is missing or wrong. Always include an explicit timezone offset or use n8n's `$now`/Luxon expressions with the right zone.

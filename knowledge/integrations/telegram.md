@@ -34,4 +34,30 @@ To build a bot that responds to incoming messages, use the **Telegram Trigger** 
 }
 ```
 
+## Quick copy-paste version (no credential setup)
+
+Telegram's bot token is actually part of the URL itself, not a header, so you can skip n8n's Credential system entirely and hardcode it straight into an **HTTP Request** node — simplest for personal/local use, but anyone who opens this workflow file can read the token in plain text, so don't share or upload it while the real token is still in there.
+
+```json
+{
+  "method": "POST",
+  "url": "https://api.telegram.org/bot<YOUR_TELEGRAM_BOT_TOKEN>/sendMessage",
+  "authentication": "none",
+  "sendBody": true,
+  "specifyBody": "json",
+  "jsonBody": {
+    "chat_id": "123456789",
+    "text": "Order #{{ $json.orderId }} has shipped!"
+  }
+}
+```
+
+Test it from a terminal first to confirm the token and chat ID work before building the node:
+
+```bash
+curl -X POST "https://api.telegram.org/bot<YOUR_TELEGRAM_BOT_TOKEN>/sendMessage" \
+  -H "Content-Type: application/json" \
+  -d '{"chat_id": "123456789", "text": "Order #12345 has shipped!"}'
+```
+
 **Common mistake:** Using the bot's own username or ID instead of the **Chat ID** of the person or group you're messaging. The Chat ID is unique per conversation and must be captured from an actual incoming message — it's not visible anywhere in Telegram's UI directly.

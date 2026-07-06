@@ -38,4 +38,28 @@ curl -X POST "https://discord.com/api/webhooks/xxxx/yyyy" \
   -d '{"content": "Test message from n8n"}'
 ```
 
+## Quick copy-paste version (no credential setup)
+
+This approach puts the webhook URL directly in the HTTP Request node instead of using n8n's Credential system — it's the simplest option for personal or local workflows, but anyone who opens this workflow can see the URL, so don't share the workflow file with the URL still in it.
+
+```json
+{
+  "method": "POST",
+  "url": "<YOUR_DISCORD_WEBHOOK_URL>",
+  "sendBody": true,
+  "contentType": "json",
+  "bodyParameters": {
+    "content": "message text"
+  }
+}
+```
+
+Test it directly with curl before building the node:
+
+```bash
+curl -X POST "<YOUR_DISCORD_WEBHOOK_URL>" \
+  -H "Content-Type: application/json" \
+  -d '{"content": "message text"}'
+```
+
 **Common mistake:** Forgetting that Discord webhook messages are limited to 2000 characters and will fail silently or error if the `content` field is empty — always include at least some text, even if you're mainly sending an embed.

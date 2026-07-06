@@ -35,4 +35,38 @@ You can also send raw JSON via the HTTP Request node if you need more control:
 }
 ```
 
+## Quick copy-paste version (no credential setup)
+
+If you'd rather not use n8n's Credential system at all, you can hardcode your Slack bot token directly into an **HTTP Request** node's headers instead — this is the simplest option for personal/local use, but remember that anyone who opens this workflow can read the token in plain text, so never share or upload the workflow file while the real token is still in it.
+
+```json
+{
+  "method": "POST",
+  "url": "https://slack.com/api/chat.postMessage",
+  "authentication": "none",
+  "sendHeaders": true,
+  "headerParameters": {
+    "parameters": [
+      { "name": "Authorization", "value": "Bearer <YOUR_SLACK_BOT_TOKEN>" },
+      { "name": "Content-Type", "value": "application/json" }
+    ]
+  },
+  "sendBody": true,
+  "specifyBody": "json",
+  "jsonBody": {
+    "channel": "#sales-leads",
+    "text": "New lead: Jane Doe (jane@example.com)"
+  }
+}
+```
+
+Test it directly from a terminal first to confirm the token works before wiring up the node:
+
+```bash
+curl -X POST https://slack.com/api/chat.postMessage \
+  -H "Authorization: Bearer <YOUR_SLACK_BOT_TOKEN>" \
+  -H "Content-Type: application/json" \
+  -d '{"channel": "#sales-leads", "text": "New lead: Jane Doe (jane@example.com)"}'
+```
+
 **Common mistake:** Forgetting to invite the Slack bot into the channel first. If the bot isn't a member of the channel, message posts will fail with a `not_in_channel` error — invite it with `/invite @YourBotName` in Slack before running the workflow.

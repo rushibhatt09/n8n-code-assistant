@@ -43,4 +43,29 @@ To update a document, use **Operation** `Update`, with a query to match the docu
 { "query": { "_id": "{{ $json.id }}" }, "update": { "$set": { "status": "closed" } } }
 ```
 
+## Quick copy-paste version (connection string method)
+
+MongoDB needs connection details (host, port, database name, user, password) rather than a single API key, and the fastest way to fill them in is a single connection string — copy the block below and swap in your real values.
+
+```text
+# Option A: MongoDB Atlas (recommended) — single connection string
+mongodb+srv://<YOUR_DB_USER>:<YOUR_DB_PASSWORD>@<YOUR_CLUSTER_HOST>/<YOUR_DB_NAME>
+
+# Option B: self-hosted MongoDB — individual fields
+Host:     <YOUR_DB_HOST>
+Port:     <YOUR_DB_PORT>       (default: 27017)
+Database: <YOUR_DB_NAME>
+User:     <YOUR_DB_USER>
+Password: <YOUR_DB_PASSWORD>
+```
+
+Once connected, here's a realistic example find query:
+
+```json
+{
+  "status": "active",
+  "createdAt": { "$gte": "2026-06-01T00:00:00Z" }
+}
+```
+
 **Common mistake:** Forgetting that MongoDB document IDs (`_id`) are `ObjectId` values, not plain strings. When matching by ID, ensure the node's query correctly interprets the string as an ObjectId — otherwise the Find/Update will return zero matches even though the record exists.

@@ -39,4 +39,60 @@ curl --url "smtp://smtp.gmail.com:587" --ssl-reqd \
   --user "you@gmail.com:app-password" -T email.txt
 ```
 
+## Quick copy-paste version (no credential setup)
+
+**Gmail is honestly not a good fit for this "just paste a key" approach.** Gmail's real REST API (`gmail.googleapis.com`) requires a full OAuth2 flow (Client ID, Client Secret, and a refresh token you have to generate through Google's consent screen) — there's no simple static API key you can drop into a header like with Slack or Notion. Any code claiming otherwise would be fake, so here are two honest alternatives instead:
+
+**Option 1 — Simplest copy-paste option: Send Email (SMTP) node with your Gmail App Password.** This isn't an HTTP Request/API call, but it's the closest thing to a "one field to replace" setup and it does bypass n8n's separate Credential UI screen since you type the password straight into the node's parameters:
+
+```json
+{
+  "fromEmail": "you@gmail.com",
+  "toEmail": "recipient@example.com",
+  "subject": "Daily Sales Summary",
+  "text": "Total orders today: {{ $json.orderCount }}",
+  "options": {
+    "smtpHost": "smtp.gmail.com",
+    "smtpPort": 587,
+    "smtpUser": "you@gmail.com",
+    "smtpPassword": "<YOUR_GMAIL_APP_PASSWORD>",
+    "smtpSecure": false
+  }
+}
+```
+
+You still need a Google **App Password** (Google Account → Security → 2-Step Verification → App Passwords) — your normal Gmail password will not work here.
+
+**Option 2 — If you want a true copy-paste static API key, switch providers.** Transactional email APIs like Resend or SendGrid issue a real static API key with no OAuth dance. Example with Resend:
+
+```json
+{
+  "method": "POST",
+  "url": "https://api.resend.com/emails",
+  "authentication": "none",
+  "sendHeaders": true,
+  "headerParameters": {
+    "parameters": [
+      { "name": "Authorization", "value": "Bearer <YOUR_API_KEY>" },
+      { "name": "Content-Type", "value": "application/json" }
+    ]
+  },
+  "sendBody": true,
+  "specifyBody": "json",
+  "jsonBody": {
+    "from": "you@yourdomain.com",
+    "to": "recipient@example.com",
+    "subject": "Daily Sales Summary",
+    "text": "Total orders today: {{ $json.orderCount }}"
+  }
+}
+```
+
+```bash
+curl -X POST https://api.resend.com/emails \
+  -H "Authorization: Bearer <YOUR_API_KEY>" \
+  -H "Content-Type: application/json" \
+  -d '{"from": "you@yourdomain.com", "to": "recipient@example.com", "subject": "Daily Sales Summary", "text": "Total orders today: 42"}'
+```
+
 **Common mistake:** Using your normal Gmail password with the SMTP credential — Google blocks this. You must generate an **App Password** in your Google Account security settings (requires 2-Step Verification enabled) and use that instead.

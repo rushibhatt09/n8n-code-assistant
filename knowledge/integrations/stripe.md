@@ -43,4 +43,35 @@ curl https://api.stripe.com/v1/charges \
   -d amount=2000 -d currency=usd -d customer=cus_ABC123
 ```
 
+## Quick copy-paste version (no credential setup)
+
+This approach puts your Stripe Secret Key directly in the HTTP Request node instead of using n8n's Credential system — simplest for personal or local use, but anyone who can open this workflow can see the key, so don't share the workflow file with the key still in it.
+
+```json
+{
+  "method": "POST",
+  "url": "https://api.stripe.com/v1/customers",
+  "authentication": "none",
+  "sendHeaders": true,
+  "headerParameters": {
+    "Authorization": "Bearer <YOUR_STRIPE_SECRET_KEY>"
+  },
+  "sendBody": true,
+  "contentType": "form-urlencoded",
+  "bodyParameters": {
+    "email": "customer@example.com",
+    "name": "Jane Doe"
+  }
+}
+```
+
+Test it directly with curl before building the node:
+
+```bash
+curl https://api.stripe.com/v1/customers \
+  -u <YOUR_STRIPE_SECRET_KEY>: \
+  -d email=customer@example.com \
+  -d name="Jane Doe"
+```
+
 **Common mistake:** Testing with a live Secret Key instead of a test key (`sk_test_...`), which creates real charges. Always develop and test workflows using Stripe's Test Mode keys and test card numbers before switching to live keys.

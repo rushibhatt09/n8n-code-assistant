@@ -41,4 +41,34 @@ Example expression to build a row object dynamically:
 }
 ```
 
+## Quick copy-paste version (no credential setup)
+
+Google Sheets genuinely cannot be used with a simple static API key for writing data — Google requires OAuth2, where a short-lived access token is issued after you sign in and grant permission, and that token expires and needs refreshing. Because of this, using n8n's built-in **Google Sheets OAuth2 API** credential (Option A above) is actually the simplest path — it handles the sign-in and token refresh for you automatically. The direct HTTP call below is mainly useful for advanced users testing with a temporary access token (e.g. one pasted from Google's OAuth 2.0 Playground) before wiring up the full node.
+
+```json
+{
+  "method": "POST",
+  "url": "https://sheets.googleapis.com/v4/spreadsheets/<YOUR_SPREADSHEET_ID>/values/Sheet1!A1:append?valueInputOption=USER_ENTERED",
+  "authentication": "none",
+  "sendHeaders": true,
+  "headerParameters": {
+    "Authorization": "Bearer <YOUR_GOOGLE_OAUTH_ACCESS_TOKEN>"
+  },
+  "sendBody": true,
+  "contentType": "json",
+  "bodyParameters": {
+    "values": [["Order ID", "Customer", "Total"]]
+  }
+}
+```
+
+Test it directly with curl before building the node:
+
+```bash
+curl -X POST "https://sheets.googleapis.com/v4/spreadsheets/<YOUR_SPREADSHEET_ID>/values/Sheet1!A1:append?valueInputOption=USER_ENTERED" \
+  -H "Authorization: Bearer <YOUR_GOOGLE_OAUTH_ACCESS_TOKEN>" \
+  -H "Content-Type: application/json" \
+  -d '{"values": [["Order ID", "Customer", "Total"]]}'
+```
+
 **Common mistake:** Selecting the wrong **Sheet** (tab) — a Google Sheets file can have multiple tabs, and the node only reads/writes to the one tab you select, not the whole spreadsheet. Double-check the tab name matches exactly, including capitalization.
